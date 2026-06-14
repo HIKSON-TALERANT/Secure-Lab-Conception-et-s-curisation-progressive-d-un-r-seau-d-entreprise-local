@@ -80,7 +80,6 @@ sudo ip route add default via 192.168.100.1
 # Configurer le DNS
 echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
 ```
-
 ![Configuration réseau Ubuntu Server](screenshots/02_config_reseau_ubuntu_server.png)
 
 ---
@@ -103,7 +102,7 @@ ping 8.8.8.8         # Ping vers internet
 
 ---
 
-## ✅ Résultats
+## Résultats
 
 - [x] Interface tap0 créée sur Kali hôte
 - [x] NAT configuré — partage WiFi vers les VMs
@@ -114,24 +113,6 @@ ping 8.8.8.8         # Ping vers internet
 - [ ] DVWA installé et accessible
 
 ---
-
-## 📸 Captures d'écran
-
-| Fichier | Description |
-|---|---|
-| `01_nat_tap0_kali_hote.png` | Configuration NAT et tap0 sur Kali hôte |
-| `02_config_reseau_ubuntu_server.png` | Configuration IP, ping Kali et ping 8.8.8.8 |
-| `03_topologie_gns3.png` | Topologie complète du réseau dans GNS3 |
-
----
-
-## 🔗 Phase suivante
-
-[Phase 2 — Capture et analyse du trafic réseau](../phase2-analyse-trafic/README.md)
-
-
-
-
 
 
 ## 🔗 Phase suivante
