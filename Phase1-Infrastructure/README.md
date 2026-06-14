@@ -9,36 +9,31 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 ---
 
 ##  Architecture
-[Cloud/Internet]
 
-|
-
-[Switch GNS3]
-
-/      |      
-
-[Kali] [Ubuntu  ] [Windows XP]
-
-[Server  ]
+> **Note :** L'audit est réalisé depuis Kali hôte via l'interface tap0
+> connectée au réseau simulé. Une VM Kali dédiée sera intégrée dans
+> une version ultérieure du lab.
 
 ---
 
-##  Machines virtuelles
+## 🖥️ Machines virtuelles
 
-| Machine | OS | Rôle |
-|---|---|---|
-| Kali Linux | Kali Linux (hôte) | Attaquant / Auditeur |
-| Ubuntu Server | Ubuntu Server | Serveur web — héberge DVWA |
-| Windows XP | Windows XP | Client du réseau |
+| Machine | OS | Rôle | Adresse IP |
+|---|---|---|---|
+| Kali Linux (hôte) | Kali Linux | Attaquant / Auditeur | 192.168.100.1 (tap0) |
+| Ubuntu Server | Ubuntu Server | Serveur web — héberge DVWA | 192.168.100.10 |
+| Windows XP | Windows XP | Client du réseau | 192.168.100.20 |
 
 ---
 
-## Outils utilisés
+## 🛠️ Outils utilisés
 
 | Outil | Rôle |
 |---|---|
 | GNS3 | Simulation réseau — switch central |
 | VirtualBox | Virtualisation des machines |
+| tap0 | Interface virtuelle NAT sur Kali hôte |
+| iptables | Partage de connexion WiFi vers les VMs |
 | Apache2 + PHP | Serveur web pour DVWA |
 | MySQL | Base de données DVWA |
 | DVWA | Application web vulnérable |
@@ -47,34 +42,97 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 
 ## 📋 Étapes réalisées
 
-### Étape 1 — Configuration du réseau GNS3
-- Ajout des VMs VirtualBox dans GNS3
-- Connexion de toutes les machines à un switch central
-- Ajout d'un cloud pour l'accès internet
-- Vérification de la connectivité entre les machines (ping)
+### Étape 1 — Configuration NAT sur Kali hôte
 
-### Étape 2 — Installation de DVWA sur Ubuntu Server
-- Mise à jour du système
-- Installation Apache2, PHP, MySQL
-- Téléchargement et configuration de DVWA
-- Accès à DVWA depuis le navigateur de Kali
+Le WiFi (wlan0) ne supporte pas le bridge direct sous Linux.
+Solution : création d'une interface tap0 avec partage de connexion via iptables.
+
+```bash
+# Créer l'interface tap0
+sudo ip tuntap add tap0 mode tap
+sudo ip link set tap0 up
+sudo ip addr add 192.168.100.1/24 dev tap0
+
+# Activer le forwarding IP
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# NAT — partager wlan0 via tap0
+sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+sudo iptables -A FORWARD -i tap0 -o wlan0 -j ACCEPT
+sudo iptables -A FORWARD -i wlan0 -o tap0 -m state \
+  --state RELATED,ESTABLISHED -j ACCEPT
+```
+
+![Configuration NAT Kali](screenshots/01_nat_tap0_kali_hote.png)
 
 ---
 
-## Résultats
+### Étape 2 — Configuration réseau sur Ubuntu Server
 
-- [ ] Ping entre toutes les machines fonctionnel
-- [ ] Accès internet depuis les VMs
-- [ ] DVWA accessible via navigateur sur le réseau local
-- [ ] Page de login DVWA opérationnelle
+```bash
+# Assigner une IP statique
+sudo ip addr add 192.168.100.10/24 dev enp0s3
+sudo ip link set enp0s3 up
+
+# Ajouter la route par défaut
+sudo ip route add default via 192.168.100.1
+
+# Configurer le DNS
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+```
+
+![Configuration réseau Ubuntu Server](screenshots/02_config_reseau_ubuntu_server.png)
+
+---
+
+### Étape 3 — Vérification de la connectivité
+
+```bash
+# Depuis Ubuntu Server
+ping 192.168.100.1   # Ping vers Kali hôte
+ping 8.8.8.8         # Ping vers internet
+```
+
+![Ping Kali et Internet depuis Ubuntu Server](screenshots/02_config_reseau_ubuntu_server.png)
+
+---
+
+### Étape 4 — Topologie GNS3
+
+![Topologie GNS3](screenshots/03_topologie_gns3.png)
+
+---
+
+## ✅ Résultats
+
+- [x] Interface tap0 créée sur Kali hôte
+- [x] NAT configuré — partage WiFi vers les VMs
+- [x] Topologie GNS3 opérationnelle
+- [x] Ping Ubuntu Server → Kali hôte fonctionnel
+- [x] Ping Ubuntu Server → Internet fonctionnel
+- [ ] Configuration réseau Windows XP vérifiée
+- [ ] DVWA installé et accessible
 
 ---
 
 ## 📸 Captures d'écran
 
-*(à ajouter au fur et à mesure)*
+| Fichier | Description |
+|---|---|
+| `01_nat_tap0_kali_hote.png` | Configuration NAT et tap0 sur Kali hôte |
+| `02_config_reseau_ubuntu_server.png` | Configuration IP, ping Kali et ping 8.8.8.8 |
+| `03_topologie_gns3.png` | Topologie complète du réseau dans GNS3 |
 
 ---
+
+## 🔗 Phase suivante
+
+[Phase 2 — Capture et analyse du trafic réseau](../phase2-analyse-trafic/README.md)
+
+
+
+
+
 
 ## 🔗 Phase suivante
 
