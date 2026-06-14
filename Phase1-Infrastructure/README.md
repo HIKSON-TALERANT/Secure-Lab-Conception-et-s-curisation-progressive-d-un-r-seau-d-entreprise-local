@@ -62,7 +62,7 @@ sudo iptables -A FORWARD -i tap0 -o wlan0 -j ACCEPT
 sudo iptables -A FORWARD -i wlan0 -o tap0 -m state \
   --state RELATED,ESTABLISHED -j ACCEPT
 ```
-
+Capture d'écran sur kali :
 ![Configuration NAT Kali](screenshots/01_nat_tap0_kali_hote.png)
 
 ---
@@ -80,6 +80,7 @@ sudo ip route add default via 192.168.100.1
 # Configurer le DNS
 echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
 ```
+Capture d'écran sur Ubuntu Server :
 ![Configuration réseau Ubuntu Server](screenshots/02_config_reseau_ubuntu_server.png)
 
 ---
@@ -91,13 +92,12 @@ echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
 ping 192.168.100.1   # Ping vers Kali hôte
 ping 8.8.8.8         # Ping vers internet
 ```
-
-![Ping Kali et Internet depuis Ubuntu Server](screenshots/02_config_reseau_ubuntu_server.png)
+Capture d'écran sur Ubuntu server
+![Ping Kali et Internet depuis Ubuntu Server](screenshots/02_ping_reseau_hote.png)
 
 ---
 
 ### Étape 4 — Topologie GNS3
-
 ![Topologie GNS3](screenshots/03_topologie_gns3.png)
 
 ---
