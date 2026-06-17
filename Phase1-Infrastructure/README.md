@@ -13,17 +13,7 @@ servira de cible tout au long de ce lab.
 
 ##  Architecture du réseau
 
-```
-        [Cloud/Internet]
-               |
-             tap0
-               |
-         [Switch1 GNS3]
-        /       |       \
-[Ubuntu ]  [Kali hôte]  [Windows]
-[Server ]  [192.168.  ]  [XP    ]
-[100.10 ]  [100.1    ]  [100.20 ]
-```
+![Architecture du réseau](screenshots/00_topologie_reseau.png)
 
 > **Pourquoi tap0 et pas un bridge direct ?**
 > Le WiFi (wlan0) ne supporte pas le mode bridge sous Linux. J'ai donc créé
@@ -253,13 +243,13 @@ sudo nano /var/www/html/DVWA/config/config.inc.php
 Modifier ces lignes :
 
 ```php
-$_DVWA[ 'db_server' ]   = '127.0.0.1';
+$_DVWA[ 'db_server' ]   = 'localhost';
 $_DVWA[ 'db_database' ] = 'dvwa';
 $_DVWA[ 'db_user' ]     = 'dvwa';
 $_DVWA[ 'db_password' ] = 'p@ssw0rd';
 ```
 
-> **Attention :** `db_server` doit rester `127.0.0.1` — MySQL tourne
+> **Attention :** `db_server` doit rester `localhost` ou `127.0.0.1` — MySQL tourne
 > localement sur Ubuntu Server. Ne pas mettre l'IP du serveur ici.
 
 ```bash
@@ -310,5 +300,3 @@ Cliquer sur **Setup / Reset DB** puis **Create / Reset Database**.
 
 [Phase 2 — Capture et analyse du trafic réseau](../Phase%202%20-%20Capture%20et%20analyse%20du%20trafic%20réseau/README.md)
 ```
-
----
