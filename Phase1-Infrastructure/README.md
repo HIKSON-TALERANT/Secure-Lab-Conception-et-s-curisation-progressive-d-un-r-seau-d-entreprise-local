@@ -1,14 +1,39 @@
+Voilà le README réorganisé et réécrit comme un vrai tutoriel personnel :
 
+```markdown
 # Phase 1 — Infrastructure & Application vulnérable
 
 ## Objectif
 
-Mettre en place un réseau d'entreprise local simulé avec accès internet,
-et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
+Dans cette phase, j'ai mis en place un réseau d'entreprise local simulé sous GNS3
+et VirtualBox, avec accès internet, puis j'y ai hébergé DVWA comme cible d'audit.
+
+L'idée de départ est simple : avant de sécuriser un réseau, il faut savoir
+l'attaquer. DVWA est une application web volontairement vulnérable — elle me
+servira de cible tout au long de ce lab.
 
 ---
 
-##  Architecture
+##  Architecture du réseau
+
+```
+        [Cloud/Internet]
+               |
+             tap0
+               |
+         [Switch1 GNS3]
+        /       |       \
+[Ubuntu ]  [Kali hôte]  [Windows]
+[Server ]  [192.168.  ]  [XP    ]
+[100.10 ]  [100.1    ]  [100.20 ]
+```
+
+> **Pourquoi tap0 et pas un bridge direct ?**
+> Le WiFi (wlan0) ne supporte pas le mode bridge sous Linux. J'ai donc créé
+> une interface virtuelle tap0 sur Kali hôte et configuré un NAT via iptables
+> pour partager la connexion internet avec les VMs.
+
+---
 
 ## 🖥️ Machines virtuelles
 
@@ -35,12 +60,31 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 
 ---
 
-## 📋 Étapes réalisées
+## Étapes
 
-### Étape 1 — Configuration NAT sur Kali hôte
+### Étape 1 — Construire la topologie dans GNS3
 
-Le WiFi (wlan0) ne supporte pas le bridge direct sous Linux.
-Solution : création d'une interface tap0 avec partage de connexion via iptables.
+La première chose à faire est de dessiner le réseau dans GNS3 avant de
+toucher à quoi que ce soit d'autre. Ça donne une vision claire de ce qu'on
+construit.
+
+**Dans GNS3 :**
+- Ajouter un **Switch** central
+- Ajouter un **Cloud** et le configurer sur l'interface **tap0**
+- Ajouter les 3 machines : UbuntuServer, WindowsXP, Kali (depuis VirtualBox)
+- Relier chaque machine au Switch
+
+![Topologie GNS3](screenshots/03_topologie_gns3.png)
+
+> À ce stade les machines sont connectées mais elles n'ont pas encore
+> d'adresses IP — elles ne peuvent pas communiquer entre elles.
+
+---
+
+### Étape 2 — Créer l'interface tap0 sur Kali hôte
+
+Le Cloud dans GNS3 pointe sur tap0 — cette interface n'existe pas par défaut,
+il faut la créer manuellement sur Kali hôte.
 
 ```bash
 # Créer l'interface tap0
@@ -49,78 +93,123 @@ sudo ip link set tap0 up
 sudo ip addr add 192.168.100.1/24 dev tap0
 
 # Activer le forwarding IP
+# Sans ça, Kali reçoit les paquets des VMs mais ne les retransmet pas
 sudo sysctl -w net.ipv4.ip_forward=1
 
-# NAT — partager wlan0 via tap0
+# NAT — partager la connexion WiFi (wlan0) avec les VMs via tap0
 sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
 sudo iptables -A FORWARD -i tap0 -o wlan0 -j ACCEPT
 sudo iptables -A FORWARD -i wlan0 -o tap0 -m state \
   --state RELATED,ESTABLISHED -j ACCEPT
 ```
-### Capture d'écran sur kali :
 
 ![Configuration NAT Kali](screenshots/01_nat_tap0_kali_hote.png)
 
+> **Note importante :** cette configuration est temporaire — elle disparaît
+> au redémarrage de Kali. Pour la rendre permanente, il faudra la scripter
+> ou l'intégrer au démarrage. Pour l'instant on la relance manuellement
+> à chaque session de lab.
+
 ---
 
-### Étape 2 — Configuration réseau sur Ubuntu Server
+### Étape 3 — Configurer l'adresse IP sur Ubuntu Server
+
+Une fois tap0 active et GNS3 lancé, on configure Ubuntu Server avec une
+IP statique persistante via Netplan.
 
 ```bash
-# Assigner une IP statique
-sudo ip addr add 192.168.100.10/24 dev enp0s3
-sudo ip link set enp0s3 up
+# Désactiver cloud-init pour qu'il n'écrase pas la config au redémarrage
+sudo bash -c 'echo "network: {config: disabled}" > \
+  /etc/cloud/cloud.cfg.d/99-disable-network.cfg'
 
-# Ajouter la route par défaut
-sudo ip route add default via 192.168.100.1
-
-# Configurer le DNS
-echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+# Créer le fichier de config Netplan
+sudo nano /etc/netplan/99-static.yaml
 ```
-### Capture d'écran sur Ubuntu Server :
+
+Contenu du fichier :
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 192.168.100.10/24
+      routes:
+        - to: default
+          via: 192.168.100.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+```
+
+```bash
+# Appliquer la configuration
+sudo netplan apply
+```
 
 ![Configuration réseau Ubuntu Server](screenshots/02_config_reseau_ubuntu_server.png)
 
 ---
 
-### Étape 3 — Vérification de la connectivité
+### Étape 4 — Vérifier la connectivité depuis Ubuntu Server
 
 ```bash
-# Depuis Ubuntu Server
 ping 192.168.100.1   # Ping vers Kali hôte
 ping 8.8.8.8         # Ping vers internet
 ```
-### Capture d'écran sur Ubuntu server
 
 ![Ping Kali et Internet depuis Ubuntu Server](screenshots/02_ping_reseau_hote.png)
 
+> Si le ping vers Kali passe mais pas vers internet, vérifier que
+> le forwarding IP est bien actif sur Kali : `cat /proc/sys/net/ipv4/ip_forward`
+> doit retourner 1.
+
 ---
 
-### Étape 4 — Topologie GNS3
-![Topologie GNS3](screenshots/03_topologie_gns3.png)
+### Étape 5 — Configurer l'adresse IP sur Windows XP
 
----
+Sur Windows XP, la configuration se fait via l'interface graphique :
 
-### Étape 5 — Configuration réseau Windows XP
-
-Attribution d'une IP statique via l'interface graphique Windows XP.
-
-**Paramètres configurés :**
-- Adresse IP : 192.168.100.20
-- Masque de sous-réseau : 255.255.255.0
-- Passerelle par défaut : 192.168.100.1
+**Paramètres :**
+- Adresse IP : `192.168.100.20`
+- Masque de sous-réseau : `255.255.255.0`
+- Passerelle par défaut : `192.168.100.1`
 
 ![Configuration IP Windows XP](screenshots/04_config_ip_windows_xp.png)
 
-**Vérification de la connectivité :**
+**Vérification :**
 
 ```cmd
-ping 192.168.100.1    # Ping vers Kali hôte 
-ping 192.168.100.10   # Ping vers Ubuntu Server 
+ping 192.168.100.1    # Ping vers Kali hôte
+ping 192.168.100.10   # Ping vers Ubuntu Server
 ```
 
-![Ping Kali et Ubuntu Server depuis Windows XP](screenshots/05_ping_kali_ubuntu_windows_xp.png)
+![Ping depuis Windows XP](screenshots/05_ping_kali_ubuntu_windows_xp.png)
 
-### Étape 6 — Installation de DVWA
+---
+
+### Étape 6 — Installer Apache, PHP et MySQL sur Ubuntu Server
+
+Le réseau est en place. On installe maintenant la pile logicielle
+nécessaire pour héberger DVWA.
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install apache2 php php-mysqli php-gd libapache2-mod-php mysql-server -y
+```
+
+Vérifier qu'Apache tourne :
+
+```bash
+sudo systemctl status apache2
+```
+
+---
+
+### Étape 7 — Installer DVWA
 
 ```bash
 # Cloner DVWA dans le répertoire web Apache
@@ -140,7 +229,7 @@ sudo cp config.inc.php.dist config.inc.php
 
 ---
 
-### Étape 7 — Configuration de la base de données MySQL
+### Étape 8 — Créer la base de données MySQL
 
 ```bash
 sudo mysql -u root
@@ -158,13 +247,13 @@ exit;
 
 ---
 
-### Étape 8 — Configuration du fichier config.inc.php
+### Étape 9 — Configurer DVWA
 
 ```bash
 sudo nano /var/www/html/DVWA/config/config.inc.php
 ```
 
-Paramètres configurés :
+Modifier ces lignes :
 
 ```php
 $_DVWA[ 'db_server' ]   = '127.0.0.1';
@@ -173,40 +262,56 @@ $_DVWA[ 'db_user' ]     = 'dvwa';
 $_DVWA[ 'db_password' ] = 'p@ssw0rd';
 ```
 
+> **Attention :** `db_server` doit rester `127.0.0.1` — MySQL tourne
+> localement sur Ubuntu Server. Ne pas mettre l'IP du serveur ici.
+
+```bash
+sudo systemctl restart apache2
+```
+
 ![Configuration fichier config DVWA](screenshots/08_configuration_config_dvwa.png)
 
 ---
 
-### Étape 9 — Accès à DVWA depuis le réseau
+### Étape 10 — Initialiser et accéder à DVWA
 
-**Depuis Kali hôte — page de connexion :**
+Depuis le navigateur sur Kali hôte :
+
+```
+http://192.168.100.10/DVWA/login.php
+```
+
+- Login : `admin`
+- Password : `password`
+
+Cliquer sur **Setup / Reset DB** puis **Create / Reset Database**.
 
 ![Page de connexion DVWA sur Kali](screenshots/09_dvwa_login_kali.png)
 
-**Depuis Kali hôte — tableau de bord DVWA :**
+![Tableau de bord DVWA sur Kali](screenshots/10_dvwa_dashboard_kali.png)
 
-![Accès DVWA sur Kali Linux](screenshots/10_dvwa_dashboard_kali.png)
-
-**Depuis Windows XP — accès confirmé :**
-
-![Accès DVWA sur Windows XP](screenshots/11_dvwa_windows_xp.png)
+![Accès DVWA depuis Windows XP](screenshots/11_dvwa_windows_xp.png)
 
 > DVWA est accessible depuis toutes les machines du réseau local
 > via `http://192.168.100.10/DVWA/index.php`
 
-## Résultats
-
-- [x] Interface tap0 créée sur Kali hôte
-- [x] NAT configuré — partage WiFi vers les VMs
-- [x] Topologie GNS3 opérationnelle
-- [x] Ping Ubuntu Server → Kali hôte fonctionnel
-- [x] Ping Ubuntu Server → Internet fonctionnel
-- [x] Configuration réseau Windows XP vérifiée
-- [x] DVWA installé et accessible
-
 ---
 
+## Résultats
+
+- [x] Topologie GNS3 construite et opérationnelle
+- [x] Interface tap0 créée et NAT configuré sur Kali hôte
+- [x] Ubuntu Server configuré avec IP statique persistante
+- [x] Ping Ubuntu Server → Kali hôte fonctionnel
+- [x] Ping Ubuntu Server → Internet fonctionnel
+- [x] Windows XP configuré et connecté au réseau
+- [x] DVWA installé et accessible depuis toutes les machines
+
+---
 
 ## 🔗 Phase suivante
 
 [Phase 2 — Capture et analyse du trafic réseau](../Phase%202%20-%20Capture%20et%20analyse%20du%20trafic%20réseau/README.md)
+```
+
+---
