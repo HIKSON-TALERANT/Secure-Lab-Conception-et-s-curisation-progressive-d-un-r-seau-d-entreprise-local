@@ -50,7 +50,7 @@ Spécialisation : Cybersécurité & détection réseau
 
 | Phase | Statut |
 |---|---|
-| Phase 1 — Infrastructure | 🔄 En cours |
-| Phase 2 — Analyse trafic | ⏳ À venir |
-| Phase 3 — pfSense | ⏳ À venir |
-| Phase 4 — Suricata/Wazuh | ⏳ À venir |
+| Phase 1 — Infrastructure | Terminé |
+| Phase 2 — Analyse trafic | En cours |
+| Phase 3 — pfSense | À venir |
+| Phase 4 — Suricata/Wazuh | À venir |
