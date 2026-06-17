@@ -105,6 +105,27 @@ ping 8.8.8.8         # Ping vers internet
 
 ---
 
+### Étape 5 — Configuration réseau Windows XP
+
+Attribution d'une IP statique via l'interface graphique Windows XP.
+
+**Paramètres configurés :**
+- Adresse IP : 192.168.100.20
+- Masque de sous-réseau : 255.255.255.0
+- Passerelle par défaut : 192.168.100.1
+
+![Configuration IP Windows XP](screenshots/04_config_ip_windows_xp.png)
+
+**Vérification de la connectivité :**
+
+```cmd
+ping 192.168.100.1    # Ping vers Kali hôte 
+ping 192.168.100.10   # Ping vers Ubuntu Server 
+```
+
+![Ping Kali et Ubuntu Server depuis Windows XP](screenshots/05_ping_kali_ubuntu_windows_xp.png)
+
+
 ## Résultats
 
 - [x] Interface tap0 créée sur Kali hôte
