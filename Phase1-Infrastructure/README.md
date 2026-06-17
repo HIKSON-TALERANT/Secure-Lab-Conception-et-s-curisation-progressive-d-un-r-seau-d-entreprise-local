@@ -10,13 +10,11 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 
 ##  Architecture
 
----
-
 ## 🖥️ Machines virtuelles
 
 | Machine | OS | Rôle | Adresse IP |
 |---|---|---|---|
-| Kali Linux (hôte) | Kali Linux | Attaquant / Auditeur | 192.168.100.1 (tap0) |
+| Kali Linux (hôte)  | Kali Linux | Attaquant / Auditeur | 192.168.100.1 (tap0) |
 | Ubuntu Server | Ubuntu Server | Serveur web — héberge DVWA | 192.168.100.10 |
 | Windows XP | Windows XP | Client du réseau | 192.168.100.20 |
 
@@ -35,6 +33,22 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 | DVWA | Application web vulnérable |
 
 ---
+## 🔧 Versions des outils et systèmes
+
+| Outil / OS | Version |
+|---|---|
+| Kali Linux (hôte) | 2026.2 |
+| Ubuntu Server | 24.04.1 LTS (Noble Numbat) |
+| Windows XP | 5.2.3790 |
+| VirtualBox | 7.2.8 |
+| GNS3 | 3.0.6 (Linux 64-bit) |
+| Apache2 | 2.4.58 |
+| PHP | 8.3.6 |
+| MySQL | 8.0.46 |
+
+> Ces versions permettent de reproduire l'environnement à l'identique.
+> Des versions différentes peuvent entraîner des comportements inattendus,
+> notamment pour la compatibilité GNS3/VirtualBox.
 
 ## 📋 Étapes réalisées
 
