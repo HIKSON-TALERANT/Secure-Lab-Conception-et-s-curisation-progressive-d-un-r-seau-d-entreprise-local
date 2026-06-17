@@ -10,10 +10,6 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 
 ##  Architecture
 
-> **Note :** L'audit est réalisé depuis Kali hôte via l'interface tap0
-> connectée au réseau simulé. Une VM Kali dédiée sera intégrée dans
-> une version ultérieure du lab.
-
 ---
 
 ## 🖥️ Machines virtuelles
