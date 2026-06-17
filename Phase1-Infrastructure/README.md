@@ -12,43 +12,28 @@ et y héberger DVWA (Damn Vulnerable Web Application) comme cible d'audit.
 
 ## 🖥️ Machines virtuelles
 
-| Machine | OS | Rôle | Adresse IP |
-|---|---|---|---|
-| Kali Linux (hôte)  | Kali Linux | Attaquant / Auditeur | 192.168.100.1 (tap0) |
-| Ubuntu Server | Ubuntu Server | Serveur web — héberge DVWA | 192.168.100.10 |
-| Windows XP | Windows XP | Client du réseau | 192.168.100.20 |
+| Machine | OS | Version | Rôle | Adresse IP |
+|---|---|---|---|---|
+| Kali Linux (hôte) | Kali Linux | 2026.2 | Attaquant / Auditeur | 192.168.100.1 (tap0) |
+| Ubuntu Server | Ubuntu Server | 24.04.1 LTS | Serveur web — héberge DVWA | 192.168.100.10 |
+| Windows XP | Windows XP | 5.2.3790 | Client du réseau | 192.168.100.20 |
 
 ---
 
 ## 🛠️ Outils utilisés
 
-| Outil | Rôle |
-|---|---|
-| GNS3 | Simulation réseau — switch central |
-| VirtualBox | Virtualisation des machines |
-| tap0 | Interface virtuelle NAT sur Kali hôte |
-| iptables | Partage de connexion WiFi vers les VMs |
-| Apache2 + PHP | Serveur web pour DVWA |
-| MySQL | Base de données DVWA |
-| DVWA | Application web vulnérable |
+| Outil | Version | Rôle |
+|---|---|---|
+| GNS3 | 3.0.6 | Simulation réseau — switch central |
+| VirtualBox | 7.2.8 | Virtualisation des machines |
+| tap0 | — | Interface virtuelle NAT sur Kali hôte |
+| iptables | — | Partage de connexion WiFi vers les VMs |
+| Apache2 | 2.4.58 | Serveur web pour DVWA |
+| PHP | 8.3.6 | Langage serveur pour DVWA |
+| MySQL | 8.0.46 | Base de données DVWA |
+| DVWA | latest | Application web vulnérable |
 
 ---
-## 🔧 Versions des outils et systèmes
-
-| Outil / OS | Version |
-|---|---|
-| Kali Linux (hôte) | 2026.2 |
-| Ubuntu Server | 24.04.1 LTS (Noble Numbat) |
-| Windows XP | 5.2.3790 |
-| VirtualBox | 7.2.8 |
-| GNS3 | 3.0.6 (Linux 64-bit) |
-| Apache2 | 2.4.58 |
-| PHP | 8.3.6 |
-| MySQL | 8.0.46 |
-
-> Ces versions permettent de reproduire l'environnement à l'identique.
-> Des versions différentes peuvent entraîner des comportements inattendus,
-> notamment pour la compatibilité GNS3/VirtualBox.
 
 ## 📋 Étapes réalisées
 
