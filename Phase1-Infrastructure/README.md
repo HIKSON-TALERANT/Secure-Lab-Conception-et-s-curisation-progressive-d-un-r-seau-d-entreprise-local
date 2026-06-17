@@ -133,8 +133,8 @@ ping 192.168.100.10   # Ping vers Ubuntu Server
 - [x] Topologie GNS3 opérationnelle
 - [x] Ping Ubuntu Server → Kali hôte fonctionnel
 - [x] Ping Ubuntu Server → Internet fonctionnel
-- [ ] Configuration réseau Windows XP vérifiée
-- [ ] DVWA installé et accessible
+- [x] Configuration réseau Windows XP vérifiée
+- [x] DVWA installé et accessible
 
 ---
 
