@@ -1,6 +1,3 @@
-Voilà le README réorganisé et réécrit comme un vrai tutoriel personnel :
-
-```markdown
 # Phase 1 — Infrastructure & Application vulnérable
 
 ## Objectif
