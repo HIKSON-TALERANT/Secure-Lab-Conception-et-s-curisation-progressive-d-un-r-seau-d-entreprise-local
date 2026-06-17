@@ -299,4 +299,3 @@ Cliquer sur **Setup / Reset DB** puis **Create / Reset Database**.
 ## 🔗 Phase suivante
 
 [Phase 2 — Capture et analyse du trafic réseau](../Phase%202%20-%20Capture%20et%20analyse%20du%20trafic%20réseau/README.md)
-```
