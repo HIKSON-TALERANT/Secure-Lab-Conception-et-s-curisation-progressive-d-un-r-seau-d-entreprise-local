@@ -125,6 +125,79 @@ ping 192.168.100.10   # Ping vers Ubuntu Server
 
 ![Ping Kali et Ubuntu Server depuis Windows XP](screenshots/05_ping_kali_ubuntu_windows_xp.png)
 
+### Étape 6 — Installation de DVWA
+
+```bash
+# Cloner DVWA dans le répertoire web Apache
+cd /var/www/html
+sudo git clone https://github.com/digininja/DVWA.git
+
+# Configurer les permissions
+sudo chown -R www-data:www-data /var/www/html/DVWA
+sudo chmod -R 755 /var/www/html/DVWA
+
+# Copier le fichier de configuration
+cd /var/www/html/DVWA/config
+sudo cp config.inc.php.dist config.inc.php
+```
+
+![Installation DVWA](screenshots/06_installation_dvwa.png)
+
+---
+
+### Étape 7 — Configuration de la base de données MySQL
+
+```bash
+sudo mysql -u root
+```
+
+```sql
+create database dvwa;
+create user 'dvwa'@'localhost' identified by 'p@ssw0rd';
+grant all privileges on dvwa.* to 'dvwa'@'localhost';
+flush privileges;
+exit;
+```
+
+![Configuration MySQL](screenshots/07_configuration_mysql.png)
+
+---
+
+### Étape 8 — Configuration du fichier config.inc.php
+
+```bash
+sudo nano /var/www/html/DVWA/config/config.inc.php
+```
+
+Paramètres configurés :
+
+```php
+$_DVWA[ 'db_server' ]   = '127.0.0.1';
+$_DVWA[ 'db_database' ] = 'dvwa';
+$_DVWA[ 'db_user' ]     = 'dvwa';
+$_DVWA[ 'db_password' ] = 'p@ssw0rd';
+```
+
+![Configuration fichier config DVWA](screenshots/08_configuration_config_dvwa.png)
+
+---
+
+### Étape 9 — Accès à DVWA depuis le réseau
+
+**Depuis Kali hôte — page de connexion :**
+
+![Page de connexion DVWA sur Kali](screenshots/09_dvwa_login_kali.png)
+
+**Depuis Kali hôte — tableau de bord DVWA :**
+
+![Accès DVWA sur Kali Linux](screenshots/10_dvwa_dashboard_kali.png)
+
+**Depuis Windows XP — accès confirmé :**
+
+![Accès DVWA sur Windows XP](screenshots/11_dvwa_windows_xp.png)
+
+> DVWA est accessible depuis toutes les machines du réseau local
+> via `http://192.168.100.10/DVWA/index.php`
 
 ## Résultats
 
